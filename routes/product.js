@@ -31,7 +31,8 @@ router.post('/addProduct',fetchuser,[
             price: req.body.price,
         })
 
-        res.json(product);
+        const savedProduct=await product.save();
+        res.json(savedProduct);
         console.log("Product added successfully!");
     }catch(error){
         console.log("Product not added!");
