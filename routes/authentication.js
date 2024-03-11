@@ -79,10 +79,10 @@ router.post('/loginuser',[
         }
 
         const token=jwt.sign(data, JWT_SECRET);
-        res.status(200).json({message: "User loggin successfully",username});
+        res.status(200).json({message: "User loggin successfully",username, token});
     } catch (error) {
         console.log("Error occurs");
-        res.status(500).json({message: "Some errors occuring!"});
+        res.status(500).json({message: "User not logged in!"});
     }
 })
 
