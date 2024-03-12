@@ -8,6 +8,7 @@ const JWT_SECRET=process.env.SECRET_KEY;
 const jwt=require('jsonwebtoken');
 const fetchuser = require('../middleware/auth');
 const nodemailer=require('nodemailer');
+const AppError=require('../utils/error');
 
 router.post('/',[
     //create user
@@ -15,18 +16,20 @@ router.post('/',[
     body('username','please enter valid username').isLength({min:3}),
     body('email','please enter valid email').isEmail(),
     body('password','password must atleast 5 characters').isLength({min:5}),
-], async(req,res)=>{
+], async(req,res, next)=>{
     //check if errors occur then return status and those errors
     const errors=validationResult(req);
     if(!errors.isEmpty()){
-        return res.status(400).json({errors:errors.array()})
+        // return res.status(400).json({errors:errors.array()})
+        return next(new AppError('Please enter valid details',400));
     }
 
     try{
         //check user with same email already exists or not
         let user=await users.findOne({email:req.body.email})
         if(user){
-            return res.status(400).json({error:"User already exist with this email"});
+            // return res.status(400).json({error:"User already exist with this email"});
+            return next(new AppError('Account already exists!',400));
         }
         user=await users.create({
             userid:req.body.userid,
@@ -43,22 +46,24 @@ router.post('/',[
 
         const authenToken=jwt.sign(data,JWT_SECRET);
         res.json({user, authenToken});
-        console.log("user added with new email");
+        console.log("Account created successfully!");
         // res.json(user);
     }
     catch(error){
         console.error(error.message);
-        res.status(500).send({error:"some error occured"});
+        // res.status(500).send({error:"some error occured"});
+        return next(new AppError('Some internal errors!',500));
     }
 })
 
 router.post('/loginuser',[
     body('email',"Enter a valid email ID").isEmail(),
     body('password',"Enter minimum 8 characters password").isLength({min:8}),
-], async(req,res)=>{
+], async(req,res, next)=>{
     const errors=validationResult(req);
     if(!errors.isEmpty()){
-        res.status(400).json({errors: errors.array()})
+        // res.status(400).json({errors: errors.array()})
+        return next(new AppError('Please enter valid details',400));
     }
     const {email, password}=req.body;
     try {
@@ -66,11 +71,13 @@ router.post('/loginuser',[
         const username=user.username;
         const userPassword=user.password;
         if(!user){
-            res.status(404).json({message: "User with this account not found!"});
+            // res.status(404).json({message: "User with this account not found!"});
+            return next(new AppError('Account not found!',404));
         }
 
         if(password!==userPassword){
-            res.status(404).json({message: "Invalid email or password!"});
+            // res.status(404).json({message: "Invalid email or password!"});
+            return next(new AppError('Invalid email or password!',400));
         }
 
         const data={
@@ -83,28 +90,31 @@ router.post('/loginuser',[
         res.status(200).json({message: "User loggin successfully",username, token});
     } catch (error) {
         console.log("Error occurs");
-        res.status(500).json({message: "User not logged in!"});
+        // res.status(500).json({message: "User not logged in!"});
+        return next(new AppError('Account not logged In!',500));
     }
 })
 
-router.post('/getSpecificUser',fetchuser,async(req,res)=>{
+router.post('/getSpecificUser',fetchuser,async(req,res, next)=>{
     const {uID}=req.body.id;
     try{
         const user=await users.findById(uID).select('-password');
         res.status(200).json(user);
     }catch(error){
         console.log("User not found!");
-        res.status(404).json({message: "This user is not found!"});
+        // res.status(404).json({message: "This user is not found!"});
+        return next(new AppError('User not found!',404));
     }
 })
 
 // forgot password
 router.post('/forgotpassword',[
     body('email',"Enter valid email").isEmail(),
-], async(req,res)=>{
+], async(req,res, next)=>{
     const errors=validationResult(req);
     if(!errors.isEmpty()){
-        res.status(400).json({errors:errors.array()});
+        // res.status(400).json({errors:errors.array()});
+        return next(new AppError('Please enter valid details!',400));
     }
     const email=req.body.email;
     const otp= Math.floor(100000 + Math.random() * 900000).toString();
@@ -118,7 +128,8 @@ router.post('/forgotpassword',[
         const user=await users.findOne({email});
         if(!user){
             console.log("User not found!");
-            res.status(404).json({message: "User not found!"});
+            // res.status(404).json({message: "User not found!"});
+            return next(new AppError('User not found!',404));
         }
 
         user.otp=otp;
@@ -142,8 +153,9 @@ router.post('/forgotpassword',[
 
         transporter.sendMail(mailOptions,(error, info)=>{
             if(error){
-                res.status(400).json({message: "OTP not sent!"});
                 console.log("OTP not sent!");
+                // res.status(400).json({message: "OTP not sent!"});
+                return next(new AppError('OTP not sent!',400));
             }else{
                 res.status(200).json({message: "OTP sent to you email please check!", otp});
             }
@@ -152,20 +164,23 @@ router.post('/forgotpassword',[
         // res.status(200).json({message: "User found! and OTP sent!"});
     } catch (error) {
         console.log("Error occurs");
-        res.status(500).json({message: "Internal error occurs!"});
+        // res.status(500).json({message: "Internal error occurs!"});
+        return next(new AppError('Internal error OTP not sent!',500));
     }
 })
 
-router.post('/resetpassword',async(req,res)=>{
+router.post('/resetpassword',async(req,res, next)=>{
     const {email, otp, newpassword, confirmpassword}=req.body;
     if(newpassword!==confirmpassword){
-        res.json({message: "Password and confirm password not matched!"});
+        // res.json({message: "Password and confirm password not matched!"});
+        return next(new AppError('Password and confirm password not matched!',400));
     }
     try{
         const user=await users.findOne({email,otp});
         if(!user || user.otpExpiration< Date.now()){
             console.log('Invalid email or OTP');
-            res.status(400).json({message: "Invalid email or OTP"});
+            // res.status(400).json({message: "Invalid email or OTP"});
+            return next(new AppError('Invalid OTP!',400));
         }else{
             // console.log(user);
             user.otp=undefined;
@@ -176,7 +191,8 @@ router.post('/resetpassword',async(req,res)=>{
         }
     }catch(error){
         console.log("Password not reset!");
-        res.status(500).json({message: "Password not reset!"});
+        // res.status(500).json({message: "Password not reset!"});
+        return next(new AppError('Internal error password not reset!',500));
     }
 })
 
