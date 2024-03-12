@@ -7,6 +7,7 @@ dotenv.config();
 const JWT_SECRET=process.env.SECRET_KEY;
 const jwt=require('jsonwebtoken');
 const fetchuser = require('../middleware/auth');
+const nodemailer=require('nodemailer');
 
 router.post('/',[
     //create user
@@ -87,13 +88,95 @@ router.post('/loginuser',[
 })
 
 router.post('/getSpecificUser',fetchuser,async(req,res)=>{
-    const uID=req.body.id;
+    const {uID}=req.body.id;
     try{
         const user=await users.findById(uID).select('-password');
         res.status(200).json(user);
     }catch(error){
         console.log("User not found!");
         res.status(404).json({message: "This user is not found!"});
+    }
+})
+
+// forgot password
+router.post('/forgotpassword',[
+    body('email',"Enter valid email").isEmail(),
+], async(req,res)=>{
+    const errors=validationResult(req);
+    if(!errors.isEmpty()){
+        res.status(400).json({errors:errors.array()});
+    }
+    const email=req.body.email;
+    const otp= Math.floor(100000 + Math.random() * 900000).toString();
+    try {
+        // const user=await users.findOneAndUpdate(
+        //     {email},
+        //     {otp, otpExpiration: Date.now() + 600000},
+        //     {upsert: true, new: true}
+        // )
+
+        const user=await users.findOne({email});
+        if(!user){
+            console.log("User not found!");
+            res.status(404).json({message: "User not found!"});
+        }
+
+        user.otp=otp;
+        user.otpExpiration=Date.now() + 600000;
+        await user.save();
+
+        const transporter=nodemailer.createTransport({
+            service: 'Gmail',
+            auth:{
+                user: 'ahsanzjt@gmail.com',
+                pass: 'nnlv ikfr hchy qhf',
+            },
+        })
+
+        const mailOptions={
+            from: 'ahsanzjt@gmail.com',
+            to: email,
+            subject: 'Password reset OTP',
+            text: `Your OTP (It expires in 10 minutes): ${otp}`,
+        }
+
+        transporter.sendMail(mailOptions,(error, info)=>{
+            if(error){
+                res.status(400).json({message: "OTP not sent!"});
+                console.log("OTP not sent!");
+            }else{
+                res.status(200).json({message: "OTP sent to you email please check!", otp});
+            }
+        })
+
+        // res.status(200).json({message: "User found! and OTP sent!"});
+    } catch (error) {
+        console.log("Error occurs");
+        res.status(500).json({message: "Internal error occurs!"});
+    }
+})
+
+router.post('/resetpassword',async(req,res)=>{
+    const {email, otp, newpassword, confirmpassword}=req.body;
+    if(newpassword!==confirmpassword){
+        res.json({message: "Password and confirm password not matched!"});
+    }
+    try{
+        const user=await users.findOne({email,otp});
+        if(!user || user.otpExpiration< Date.now()){
+            console.log('Invalid email or OTP');
+            res.status(400).json({message: "Invalid email or OTP"});
+        }else{
+            // console.log(user);
+            user.otp=undefined;
+            user.otpExpiration=undefined;
+            user.password=newpassword;
+            await user.save();
+            res.status(200).json({message: "Password reset successfully!"});
+        }
+    }catch(error){
+        console.log("Password not reset!");
+        res.status(500).json({message: "Password not reset!"});
     }
 })
 
