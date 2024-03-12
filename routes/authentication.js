@@ -15,7 +15,7 @@ router.post('/',[
     body('userid','please enter valid userid').isLength({min:1}),
     body('username','please enter valid username').isLength({min:3}),
     body('email','please enter valid email').isEmail(),
-    body('password','password must atleast 5 characters').isLength({min:5}),
+    body('password','password must atleast 8 characters').isLength({min:8}),
 ], async(req,res, next)=>{
     //check if errors occur then return status and those errors
     const errors=validationResult(req);
@@ -169,18 +169,23 @@ router.post('/forgotpassword',[
     }
 })
 
-router.post('/resetpassword',async(req,res, next)=>{
+router.post('/resetpassword',[
+    body('email','please enter valid email').isEmail(),
+],async(req,res, next)=>{
     const {email, otp, newpassword, confirmpassword}=req.body;
     if(newpassword!==confirmpassword){
         // res.json({message: "Password and confirm password not matched!"});
         return next(new AppError('Password and confirm password not matched!',400));
     }
+    if(newpassword.length<8){
+        return next(new AppError('Please enter password minimum 8 characters!',400));
+    }
     try{
         const user=await users.findOne({email,otp});
         if(!user || user.otpExpiration< Date.now()){
-            console.log('Invalid email or OTP');
+            console.log('Invalid or expired OTP');
             // res.status(400).json({message: "Invalid email or OTP"});
-            return next(new AppError('Invalid OTP!',400));
+            return next(new AppError('Invalid or expired OTP!',400));
         }else{
             // console.log(user);
             user.otp=undefined;
