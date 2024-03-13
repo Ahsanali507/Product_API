@@ -9,6 +9,7 @@ const jwt=require('jsonwebtoken');
 const fetchuser = require('../middleware/auth');
 const nodemailer=require('nodemailer');
 const AppError=require('../utils/error');
+const mongoose=require('mongoose');
 
 router.post('/',[
     //create user
@@ -139,13 +140,13 @@ router.post('/forgotpassword',fetchuser,[
         const transporter=nodemailer.createTransport({
             service: 'Gmail',
             auth:{
-                user: 'sampleServer',
-                pass: 'nnlv ikfr hchy qhf',
+                user: 'you email',
+                pass: 'you app password',
             },
         })
 
         const mailOptions={
-            from: 'ahsanzjt@gmail.com',
+            from: 'sender email id',
             to: email,
             subject: 'Password reset OTP',
             text: `Your OTP (It expires in 10 minutes): ${otp}`,
@@ -184,9 +185,13 @@ router.post('/resetpassword',fetchuser,[
         const user=await users.findOne({email,otp});
         if(!user || user.otpExpiration< Date.now()){
             console.log('Invalid or expired OTP');
+            user.otp=undefined;
+            user.otpExpiration=undefined;
+            await user.save();
             // res.status(400).json({message: "Invalid email or OTP"});
             return next(new AppError('Invalid or expired OTP!',400));
-        }else{
+        }
+        else{
             // console.log(user);
             user.otp=undefined;
             user.otpExpiration=undefined;
@@ -203,10 +208,28 @@ router.post('/resetpassword',fetchuser,[
 })
 
 // update particular user by admin route
+router.put('/updateuser/:id',fetchuser, async(req,res, next)=>{
+    const userID=req.params.id;
+    try{
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(userID);
+
+        if (!isValidObjectId) {
+        // If the provided ID is not a valid ObjectId, handle the error accordingly.
+            return next(new AppError(`Invalid user ID: ${userID}`, 400));
+        }
+        const updatedUser=await users.findOneAndUpdate({_id: mongoose.Types.ObjectId(userID)},req.body,{new: true});
+        res.status(200).json(updatedUser);
+    }catch(error){
+        console.log("This user is not updated!");
+        // res.json({message: `Error while updating this user: ${error}`})
+        return next(new AppError(`Error while updating this user: ${error}`,500));
+    }
+})
 
 // delete particular user by admin route
 
 // login admin route
 
+// update user profile by user him/herself
 
 module.exports=router
