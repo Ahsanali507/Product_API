@@ -108,7 +108,7 @@ router.post('/getSpecificUser',fetchuser,async(req,res, next)=>{
 })
 
 // forgot password
-router.post('/forgotpassword',[
+router.post('/forgotpassword',fetchuser,[
     body('email',"Enter valid email").isEmail(),
 ], async(req,res, next)=>{
     const errors=validationResult(req);
@@ -139,7 +139,7 @@ router.post('/forgotpassword',[
         const transporter=nodemailer.createTransport({
             service: 'Gmail',
             auth:{
-                user: 'ahsanzjt@gmail.com',
+                user: 'sampleServer',
                 pass: 'nnlv ikfr hchy qhf',
             },
         })
@@ -169,7 +169,7 @@ router.post('/forgotpassword',[
     }
 })
 
-router.post('/resetpassword',[
+router.post('/resetpassword',fetchuser,[
     body('email','please enter valid email').isEmail(),
 ],async(req,res, next)=>{
     const {email, otp, newpassword, confirmpassword}=req.body;
@@ -192,6 +192,7 @@ router.post('/resetpassword',[
             user.otpExpiration=undefined;
             user.password=newpassword;
             await user.save();
+            console.log("Password reset successfully");
             res.status(200).json({message: "Password reset successfully!"});
         }
     }catch(error){

@@ -7,7 +7,7 @@ const fetchuser=(req,res,next)=>{
     const token=req.header('authToken');
     //console.log(token);
     if(!token){
-        res.status(401).send({error:"Token not found"});
+        res.status(401).send({error:"Token not found! user can't access first need to login"});
     }
     try {
         const user=jwt.verify(token,JWT_SECRET);
