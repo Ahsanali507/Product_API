@@ -74,7 +74,13 @@ router.get('/getSpecificProduct/:id',fetchuser, async(req,res, next)=>{
 router.put('/updateSpecificProduct/:id',fetchuser, async(req,res, next)=>{
     const productID=req.params.id;
     try{
-        const updatedProduct=await products.findOneAndUpdate({_id:productID},req.body,{new: true});
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(productID);
+
+        if (!isValidObjectId) {
+        // If the provided ID is not a valid ObjectId, handle the error accordingly.
+            return next(new AppError(`Invalid product ID: ${productID}`, 400));
+        }
+        const updatedProduct=await products.findOneAndUpdate({_id: mongoose.Types.ObjectId(productID)},req.body,{new: true});
         res.status(200).json(updatedProduct);
     }catch(error){
         console.log("This product is not updated!");
