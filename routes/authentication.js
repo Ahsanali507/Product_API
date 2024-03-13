@@ -207,7 +207,7 @@ router.post('/resetpassword',fetchuser,[
     }
 })
 
-// update particular user by admin route
+// update particular user by admin route later on we will create a separate route for admin and put this code into that routre
 router.put('/updateuser/:id',fetchuser, async(req,res, next)=>{
     const userID=req.params.id;
     try{
@@ -226,7 +226,30 @@ router.put('/updateuser/:id',fetchuser, async(req,res, next)=>{
     }
 })
 
-// delete particular user by admin route
+// delete particular user by admin route later on we will create a separate route for admin and put this code into that routre
+router.delete('/deleteuser/:id',fetchuser, async(req,res,next)=>{
+    const userID=req.params.id;
+    try{
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(userID);
+
+        if (!isValidObjectId) {
+        // If the provided ID is not a valid ObjectId, handle the error accordingly.
+            return next(new AppError(`Invalid user ID: ${userID}`, 400));
+        }
+        const deletedUser=await users.findOneAndDelete({_id:mongoose.Types.ObjectId(userID)});
+        if(!deletedUser){
+            return next(new AppError('User not found!',404));
+        }
+        else{
+            console.log("User deleted sy=uccessfully");
+            res.status(200).json(deletedUser);
+        }
+    }catch(error){
+        console.log("This user is not deleted!");
+        // res.json({message: `Error while deleting this user: ${error}`})
+        return next(new AppError(`Error while deleting this user: ${error}`,500));
+    }
+})
 
 // login admin route
 

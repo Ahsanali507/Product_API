@@ -89,11 +89,22 @@ router.put('/updateSpecificProduct/:id',fetchuser, async(req,res, next)=>{
     }
 })
 
-router.delete('/deleteSpecificProduct/:id',fetchuser, async(req,res)=>{
+router.delete('/deleteSpecificProduct/:id',fetchuser, async(req,res,next)=>{
     const productID=req.params.id;
     try{
-        const deletedProduct=await products.findOneAndDelete({_id:productID});
-        res.status(200).json(deletedProduct);
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(productID);
+
+        if (!isValidObjectId) {
+        // If the provided ID is not a valid ObjectId, handle the error accordingly.
+            return next(new AppError(`Invalid product ID: ${productID}`, 400));
+        }
+        const deletedProduct=await products.findOneAndDelete({_id:mongoose.Types.ObjectId(productID)});
+        if(!deletedProduct){
+            return next(new AppError('Product is not found!',404));
+        }
+        else{
+            res.status(200).json(deletedProduct);
+        }
     }catch(error){
         console.log("This product is not deleted!");
         // res.json({message: `Error while deleting this product: ${error}`})
