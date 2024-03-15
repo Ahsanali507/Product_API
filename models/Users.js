@@ -36,7 +36,7 @@ const UserSchema=new mongoose.Schema({
             ref:"paymentInformations"
         }
     ],
-    rating:[
+    ratings:[
         {
             type: mongoose.Schema.Types.ObjectId,
             ref:"ratings"
