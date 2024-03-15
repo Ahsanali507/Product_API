@@ -2,11 +2,6 @@ const mongoose=require('mongoose');
 const {Schema}=mongoose;
 
 const UserSchema=new mongoose.Schema({
-    userid:{
-        type:Number,
-        required:true,
-        unique:true
-    },
     username:{
         type:String,
         required:true
@@ -19,6 +14,43 @@ const UserSchema=new mongoose.Schema({
     password:{
         type:String,Number,
         required:true
+    },
+    mobile:{
+        type: String,
+        required: true
+    },
+    role:{
+        type: String,
+        required: true,
+        default:"CUSTOMER"
+    },
+    address:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:"addresses"
+        }
+    ],
+    paymentInformation:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:"paymentInformations"
+        }
+    ],
+    rating:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:"ratings"
+        }
+    ],
+    reviews:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:"reviews"
+        }
+    ],
+    createdAt:{
+        type: Date,
+        default: Date.now()
     },
     otp:{
         type: String,
