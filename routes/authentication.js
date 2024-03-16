@@ -10,6 +10,7 @@ const fetchuser = require('../middleware/auth');
 const nodemailer=require('nodemailer');
 const AppError=require('../utils/error');
 const mongoose=require('mongoose');
+const Cart=require('../models/Cart')
 
 router.post('/',[
     //create user
@@ -46,7 +47,9 @@ router.post('/',[
         }
 
         const authenToken=jwt.sign(data,JWT_SECRET);
-        res.json({user, authenToken});
+        const cart=new Cart({user});
+        const createdCart=await cart.save();
+        res.status(200).json({user, authenToken, createdCart, message:"Account and cart created successfully!" });
         console.log("Account created successfully!");
         // res.json(user);
     }

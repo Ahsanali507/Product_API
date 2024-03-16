@@ -10,7 +10,7 @@ const cartSchema=new mongoose.Schema({
     cartIems:{
         type:mongoose.Schema.Types.ObjectId,
         ref: 'cartItems',
-        required: true
+        // required: true
     },
     totalPrice:{
         type: Number,

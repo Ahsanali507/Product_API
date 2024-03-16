@@ -2,6 +2,10 @@ const mongoose=require('mongoose');
 const {Schema}=mongoose;
 
 const UserSchema=new mongoose.Schema({
+    userid:{
+        type:Number,
+        required:true
+    },
     username:{
         type:String,
         required:true
@@ -17,7 +21,7 @@ const UserSchema=new mongoose.Schema({
     },
     mobile:{
         type: String,
-        required: true
+        // required: true
     },
     role:{
         type: String,
