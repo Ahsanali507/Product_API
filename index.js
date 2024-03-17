@@ -12,6 +12,7 @@ app.use(express.json());
 
 app.use('/api/authentication',require('./routes/authentication'));
 app.use('/api', require('./routes/product'));
+app.use('/api/cart', require('./routes/cart'));
 
 app.use(errorHandler);
 
