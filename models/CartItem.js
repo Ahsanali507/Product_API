@@ -5,16 +5,16 @@ const cartItemSchema=new mongoose.Schema({
     cart:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'carts',
-        required: true,
+        // required: true,
     },
     product:{
         type:mongoose.Schema.Types.ObjectId,
         ref: 'Product',
-        required: true
+        // required: true
     },
     size:{
         type: String,
-        required: true,
+        // required: true,
     },
     quantity:{
         type: Number,
@@ -23,21 +23,21 @@ const cartItemSchema=new mongoose.Schema({
     },
     price:{
         type: Number,
-        required: true,
+        // required: true,
     },
     discount:{
         type: Number,
-        required: true,
+        // required: true,
         default: 0
     },
     discountedPrice:{
         type: Number,
-        required: true,
+        // required: true,
     },
     userid:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users',
-        required: true,
+        // required: true,
     }
 })
 
