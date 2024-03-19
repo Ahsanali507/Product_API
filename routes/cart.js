@@ -72,7 +72,7 @@ router.post('/addcartitem',fetchuser,async(req,res,next)=>{
             cart.cartItems.push(createdCartItem);
             await cart.save();
 
-            res.status(200).json({message: "Item added t0 cart"})
+            res.status(200).json({message: "Item added to cart"})
         }
     } catch (error) {
         // next(error);

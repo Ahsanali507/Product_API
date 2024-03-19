@@ -50,7 +50,7 @@ router.post('/',[
         const cart=new Carts({user});
         const createdCart=await cart.save();
         res.status(200).json({user, authenToken, createdCart, message:"Account and cart created successfully!" });
-        console.log("Account created successfully!");
+        console.log("Account and cart created successfully!");
         // res.json(user);
     }
     catch(error){
@@ -161,7 +161,7 @@ router.post('/forgotpassword',fetchuser,[
                 // res.status(400).json({message: "OTP not sent!"});
                 return next(new AppError('OTP not sent!',400));
             }else{
-                res.status(200).json({message: "OTP sent to you email please check!", otp});
+                res.status(200).json({message: "OTP sent to your email please check!", otp});
             }
         })
 
