@@ -255,15 +255,6 @@ router.delete('/deleteuser/:id',fetchuser, async(req,res,next)=>{
 })
 
 //user feedback route
-router.post('/adduserfeedback',fetchuser,[
-    body('message',"Please enter message minimum 4 characters").isLength({min:4})
-],async(req,res, next)=>{
-    const errors= validationResult(req);
-    if(!errors.isEmpty()){
-        console.log("Please enter valid input details!");
-        return next(new AppError('Please enter valid inputs details!',400));
-    }
-})
 
 // login admin route
 
