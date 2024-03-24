@@ -22,6 +22,11 @@ router.post('/addProduct',fetchuser,[
     body('title',"Enter valid title").isLength({min: 1}),
     body('description',"Enter valid description").isLength({min: 4}),
     body('price',"Enter price greater than 0").isLength({min: 1}),
+    body('discountedPrice',"Enter discountedPrice greater than 0").isLength({min: 1}),
+    body('quantity',"Enter quantity greater than 0").isLength({min: 1}),
+    body('brand',"Enter valid brand").isLength({min: 1}),
+    body('color',"Enter valid color").isLength({min: 1}),
+    body('sizes',"Enter valid sizes").isLength({min: 1}),
 ], async(req, res, next)=>{
     const errors=validationResult(req);
     if(!errors.isEmpty()){
@@ -34,6 +39,11 @@ router.post('/addProduct',fetchuser,[
             title: req.body.title,
             description: req.body.description,
             price: req.body.price,
+            discountedPrice: req.body.discountedPrice,
+            quantity: req.body.quantity,
+            brand: req.body.brand,
+            color: req.body.color,
+            sizes: req.body.sizes,
         })
 
         const savedProduct=await product.save();
