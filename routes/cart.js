@@ -45,6 +45,7 @@ router.get('/getusercart/:id',fetchuser,async(req,res,next)=>{
 
 router.post('/addcartitem',fetchuser,async(req,res,next)=>{
     const userID=req.body.userid;
+    const productID=req.body.productID;
     try {
         const isValidObjectId=mongoose.Types.ObjectId.isValid(userID);
         if (!isValidObjectId) {
@@ -52,9 +53,10 @@ router.post('/addcartitem',fetchuser,async(req,res,next)=>{
             return next(new AppError(`Invalid user ID: ${userID}`, 400));
         }
         const uID=mongoose.Types.ObjectId(userID);
-        const productID=mongoose.Types.ObjectId(req.body.productID);
+        const pID=mongoose.Types.ObjectId(productID);
         const cart=await Carts.findOne({user:uID});
-        const product=await Product.findById(productID);
+        const product=await Product.findById(pID);
+        console.log(pID);
 
         const isPresent= await CartItems.findOne({cart: cart._id, product: product._id, uID});
         if(!isPresent){
@@ -72,11 +74,14 @@ router.post('/addcartitem',fetchuser,async(req,res,next)=>{
             cart.cartItems.push(createdCartItem);
             await cart.save();
 
-            res.status(200).json({message: "Item added to cart"})
+            res.status(200).json({message: "cartItem added to cart", createdCartItem})
+        }
+        else{
+            return next(new AppError(`Cartitem already exists of this product!`, 400));
         }
     } catch (error) {
         // next(error);
-        return next(new AppError(`Invalid user ID: ${userID}`, 400));
+        return next(new AppError(`Invalid user ID: ${userID}, and cartitem not added!`, 400));
     }
 })
 
