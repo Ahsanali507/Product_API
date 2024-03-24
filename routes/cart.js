@@ -56,7 +56,7 @@ router.post('/addcartitem',fetchuser,async(req,res,next)=>{
         const pID=mongoose.Types.ObjectId(productID);
         const cart=await Carts.findOne({user:uID});
         const product=await Product.findById(pID);
-        console.log(pID);
+        // console.log(pID);
 
         const isPresent= await CartItems.findOne({cart: cart._id, product: product._id, uID});
         if(!isPresent){
@@ -77,6 +77,7 @@ router.post('/addcartitem',fetchuser,async(req,res,next)=>{
             res.status(200).json({message: "cartItem added to cart", createdCartItem})
         }
         else{
+            console.log("Cartitem already exists of this product!");
             return next(new AppError(`Cartitem already exists of this product!`, 400));
         }
     } catch (error) {
