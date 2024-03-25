@@ -86,4 +86,19 @@ router.post('/addcartitem',fetchuser,async(req,res,next)=>{
     }
 })
 
+// update cartItem
+router.put('/updatecartitem/:id',fetchuser,async(req, res, next)=>{
+    const cartItemID=req.params.id;
+    const {userID, productID} = req.body;
+    try {
+        
+    } catch (error) {
+        next(error);
+    }
+})
+
+// delete cartItem
+
+// find cartItem by ID
+
 module.exports=router;
